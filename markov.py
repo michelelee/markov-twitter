@@ -2,63 +2,86 @@ import sys
 from random import choice
 
 
-class MarkovMachine(object):
+def make_chains(input_text):
+    """Takes input text as string; returns dictionary of markov chains."""
+    # input_text is a whole text file with lines
+    # input_text.read() ??
+    # input_text_in_list = input_text.split(" ")
+    content_list = input_text.read().split()
+    # content_list = [w.rstrip("?.,\n") for w in content_list]
+    bigram_dict = {}
+    
+    for index in range(len(content_list) - 2):
+        bigram_key = (content_list[index], content_list[index + 1])
+        word_after_bigram_key = content_list[index + 2]
 
-    def read_files(self, filenames):
-        """Given a list of files, make chains from them."""
-
-        body = ""
-
-        for filename in filenames:
-            text_file = open(filename)
-            body = body + text_file.read()
-            text_file.close()
-
-        self.make_chains(body)
-
-    def make_chains(self, corpus):
-        """Takes input text as string; returns dictionary of markov chains."""
-
-        self.chains = {}
-
-        words = corpus.split()
-
-        for i in range(len(words) - 2):
-            key = (words[i], words[i + 1])
-            value = words[i + 2]
-
-            if key not in self.chains:
-                self.chains[key] = []
-
-            self.chains[key].append(value)
-
-    def make_text(self):
-        """Takes dictionary of markov chains; returns random text."""
-
-        key = choice(self.chains.keys())
-        words = [key[0], key[1]]
-
-        while key in self.chains:
-            # Keep looping until we have a key that isn't in the chains
-            # (which would mean it was the end of our original text)
-            #
-            # Note that for long texts (like a full book), this might mean
-            # it would run for a very long time.
-
-            word = choice(self.chains[key])
-            words.append(word)
-            key = (key[1], word)
-
-        text = " ".join(words)
-
-        # This is the clumsiest way to make sure it's never longer than
-        # 140 characters; can you think of better ways?
-        return text[:140]
+        if bigram_key not in bigram_dict:
+            bigram_dict[bigram_key] = []
+      
+        bigram_dict[bigram_key].append(word_after_bigram_key)
+        # list.append(value)
 
 
-if __name__ == "__main__":
-    filenames = sys.argv[1:]
+    # the new list created from words in input_text should be stored to a new variable
+    return bigram_dict
 
-    generator = MarkovMachine()
-    generator.read_files(filenames)
-    print generator.make_text()
+    
+def make_text(chains):
+    """Takes dictionary of markov chains; returns random text."""
+    # chains is the dictionary
+    # we have bigram_dict, its in chain
+    # now lets make a string...
+    # string of random... key 1 + random.choice(value_list) + key 2 + random.choice...
+    
+
+    # How long do we go? until we cannot find the key!
+    words = []
+    random_key = choice(chains.keys())
+    words.append(random_key[0])
+    words.append(random_key[1])
+
+    # random text now equals "would you"
+    # can we find...value like bigrams_dictionary['would you'] = [list of words]
+
+    while random_key in chains:
+        # # key is a tuple
+        next_word = choice(chains[random_key])
+
+        words.append(next_word)
+        # first key should added to the string when it is used the first time... or selected 
+        # then the 3 words... will continually be joined 
+        # this will print the key every time it loops over, we only need it the first time. 
+
+        # new random_key
+        random_key = (random_key[1], next_word)
+
+    words_string = " ".join(words)
+    
+    print words_string
+
+
+
+# Change this to read input_text from a file, deciding which file should
+# be used by examining the `sys.argv` arguments (if neccessary, see the
+# Python docs for sys.argv)
+
+#######################################################
+# input_text = "Some text"
+flower = open(sys.argv[1])
+# # Get a Markov chain
+chain_dict = make_chains(flower)
+# hain_dict = bigram_dict
+
+# Produce random text
+random_text = make_text(chain_dict)
+
+print random_text
+
+
+# make_chains(x)
+
+# input_text= """Hello this is natalie and mish.
+# We are in class. 
+# It is super hot today.
+# I want air conditioning. """
+
